@@ -10,6 +10,7 @@ namespace trident
     {
         static void Main(string[] args)
         {
+
         }
     }
 }
