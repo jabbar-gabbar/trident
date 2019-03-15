@@ -48,7 +48,6 @@ namespace trident
             if (this.syncSettings == null)
                 return;
 
-            //Parallel.ForEach(syncSettings, item => startSetup2(item));
             foreach (var syncItem in syncSettings)
             {
                 setup(syncItem);
@@ -63,22 +62,22 @@ namespace trident
             Console.WriteLine(AppContext.BaseDirectory);
         }
 
-        async Task listBuckets(string bucket)
-        {
-            ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
-            ListObjectsV2Response res;
-            do
-            {
-                res = await s3.ListObjectsV2Async(req);
-                foreach (S3Object obj in res.S3Objects)
-                {
-                    Console.WriteLine("key = {0}, size = {1}", obj.Key, obj.Size);
-                }
-                Console.WriteLine("Next cont. token {0} ", res.NextContinuationToken);
-                req.ContinuationToken = res.NextContinuationToken;
-            } while (res.IsTruncated);
+        //async Task listBuckets(string bucket)
+        //{
+        //    ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
+        //    ListObjectsV2Response res;
+        //    do
+        //    {
+        //        res = await s3.ListObjectsV2Async(req);
+        //        foreach (S3Object obj in res.S3Objects)
+        //        {
+        //            Console.WriteLine("key = {0}, size = {1}", obj.Key, obj.Size);
+        //        }
+        //        Console.WriteLine("Next cont. token {0} ", res.NextContinuationToken);
+        //        req.ContinuationToken = res.NextContinuationToken;
+        //    } while (res.IsTruncated);
 
-        }
+        //}
 
     }
 }
