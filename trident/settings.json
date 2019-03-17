@@ -1,7 +1,10 @@
-{
-  "directory": [
-    "path to directory",
-    "path to directory",
-    "path to nth directory" 
-  ]
-}
+[
+  {
+    "sourceFolder": "C:\\Test",
+    "s3Bucket": "my-s3-bucket-1"
+  },
+  {
+    "sourceFolder": "C:\\Test2",
+    "s3Bucket": "my-s3-bucket-2"
+  }
+]
