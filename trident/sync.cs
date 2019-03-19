@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
-
+using log4net;
 
 namespace trident
 {
@@ -33,6 +33,7 @@ namespace trident
         static readonly RegionEndpoint regionEndpoint = RegionEndpoint.USEast1;
         static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
         static IAmazonS3 s3;
+        static ILog log = LogManager.GetLogger(typeof(Sync));
 
         private List<Settings> syncSettings;
         public Sync(List<Settings> syncSettings)
@@ -46,19 +47,23 @@ namespace trident
         public void start()
         {
             if (this.syncSettings == null)
+            {
+                log.Warn("syncSettings object is null or has zero sync settings.  Please check settings.json file content");
                 return;
-
+            }
+            // iterate through each sync items and perform inventory and sync. 
             foreach (var syncItem in syncSettings)
             {
                 setup(syncItem);
-            }            
-            Console.WriteLine("done");
-            Console.ReadLine();
+            }                       
         }
 
         void setup(Settings syncSetting) {
             if (!Directory.Exists(syncSetting.sourceFolder))
+            {
+                log.Warn(string.Format("Source Directory does not exist at {0}.", syncSetting.sourceFolder));
                 return;
+            }
             Console.WriteLine(AppContext.BaseDirectory);
         }
 

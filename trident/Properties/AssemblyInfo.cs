@@ -34,3 +34,7 @@ using System.Runtime.InteropServices;
 // [assembly: AssemblyVersion("1.0.*")]
 [assembly: AssemblyVersion("1.0.0.0")]
 [assembly: AssemblyFileVersion("1.0.0.0")]
+// Tell program to load how to load log4net configuration file during the execution start up.
+[assembly: log4net.Config.XmlConfigurator(Watch = true, ConfigFile = "log4net.config")]
+
+
