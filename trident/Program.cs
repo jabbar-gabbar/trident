@@ -15,7 +15,7 @@ namespace trident
     {
         static List<Settings> syncSettings;
         static ILog log = LogManager.GetLogger(typeof(Program));
-        static string settingFileName = string.Empty;
+        static string settingsFileName = string.Empty;
         static void Main(string[] args)
         {
             try
@@ -41,6 +41,7 @@ namespace trident
                 sync.start();
 
                 log.Info("Completing backup!!!");
+                log.Error("some error");
             }
             catch (Exception ex)
             {
@@ -52,24 +53,50 @@ namespace trident
         {
             try
             {
-                settingFileName = ConfigurationManager.AppSettings["SettingsFileNameasdfasdf"];
-                if (string.IsNullOrEmpty(settingFileName))
+                // read and check all the config details are present in app.config file. 
+                settingsFileName = ConfigurationManager.AppSettings["SettingsFileName"];
+                if (string.IsNullOrEmpty(settingsFileName))
                 {
-                    throw new SettingsPropertyNotFoundException("Cannot find SettingsFileName property in config file.");
+                    throw new InvalidOperationException("Cannot find SettingsFileName property in app.config file.");
                 }
+                string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
+                if (string.IsNullOrEmpty(inventoryFolderName))
+                {
+                    throw new InvalidOperationException("Cannot find InventoryFolderName property in app.config file.");
+                }
+                if (string.IsNullOrEmpty(ConfigurationManager.AppSettings["AWSProfileName"]))
+                {
+                    throw new InvalidOperationException("Cannot find AWSProfileName property in app.config file.");
+                }
+                // verify values of the properties are valid. 
+                if (!Directory.Exists(Environment.CurrentDirectory + "\\" + inventoryFolderName))
+                {
+                    // create inventory folder.
+                    Directory.CreateDirectory(Environment.CurrentDirectory + "\\" + inventoryFolderName);
+                }
+
             }
             catch (ConfigurationErrorsException ex)
             {
                 log.Error(ex.Message, ex);
                 throw new ConfigurationErrorsException("Error occured during readAllConfig(). ", ex);
             }
+            //catch (IOException ioex)
+            //{
+            //    log.Error(ioex.Message, ioex);
+            //    throw new IOException("Error occured during readAllCOnfig() IO Operation. ", ioex);
+            //}
+            //catch(UnauthorizedAccessException ex){
+            //    log.Error(ex.Message, ex);
+            //    throw new UnauthorizedAccessException("Error occured during readAllConfig(). The current user does not have sufficient permission to create folder in current directory.",ex);
+            //}
         }
 
         static void loadSyncSettings()
         {
             // TODO: add file exists checks. and Exception block. 
             string strSettings = string.Empty;
-            using (StreamReader r = new StreamReader(AppContext.BaseDirectory + "\\" + settingFileName))
+            using (StreamReader r = new StreamReader(AppContext.BaseDirectory + "\\" + settingsFileName))
             {
                 strSettings = r.ReadToEnd();
             }
