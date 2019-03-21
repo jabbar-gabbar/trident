@@ -7,6 +7,7 @@ using Newtonsoft.Json;
 using System.IO;
 using log4net;
 using System.Configuration;
+using System.Reflection;
 //using log4net.Config;
 
 namespace trident
@@ -14,7 +15,7 @@ namespace trident
     class Program
     {
         static List<Settings> syncSettings;
-        static ILog log = LogManager.GetLogger(typeof(Program));
+        static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static string settingsFileName = string.Empty;
         static void Main(string[] args)
         {
@@ -57,22 +58,28 @@ namespace trident
                 settingsFileName = ConfigurationManager.AppSettings["SettingsFileName"];
                 if (string.IsNullOrEmpty(settingsFileName))
                 {
-                    throw new InvalidOperationException("Cannot find SettingsFileName property in app.config file.");
+                    throw new InvalidOperationException("Cannot find SettingsFileName property or value in app.config file.");
                 }
                 string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
                 if (string.IsNullOrEmpty(inventoryFolderName))
                 {
-                    throw new InvalidOperationException("Cannot find InventoryFolderName property in app.config file.");
+                    throw new InvalidOperationException("Cannot find InventoryFolderName property or value in app.config file.");
                 }
                 if (string.IsNullOrEmpty(ConfigurationManager.AppSettings["AWSProfileName"]))
                 {
-                    throw new InvalidOperationException("Cannot find AWSProfileName property in app.config file.");
+                    throw new InvalidOperationException("Cannot find AWSProfileName property or value in app.config file.");
                 }
+                // find out current executing directory through Assembly class to make sure if console app is started through other process such as task schedular.
+                string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 // verify values of the properties are valid. 
-                if (!Directory.Exists(Environment.CurrentDirectory + "\\" + inventoryFolderName))
+                if (!Directory.Exists(currentDirPath + "\\" + inventoryFolderName))
                 {
                     // create inventory folder.
-                    Directory.CreateDirectory(Environment.CurrentDirectory + "\\" + inventoryFolderName);
+                    Directory.CreateDirectory(currentDirPath + "\\" + inventoryFolderName);
+                }
+                if (!File.Exists(currentDirPath + "\\" + settingsFileName))
+                {
+                    throw new InvalidOperationException("Cannot find " + settingsFileName + " file in the application folder. ");
                 }
 
             }
