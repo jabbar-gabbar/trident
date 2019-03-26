@@ -14,7 +14,7 @@ namespace trident
 {
     class Program
     {
-        static List<Settings> syncSettings;
+        static List<Setting> syncSettings;
         static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static string settingsFileName = string.Empty;
         static void Main(string[] args)
@@ -30,7 +30,6 @@ namespace trident
                 readAllConfig();
                 // load settings.json file and retrieve sync settings
                 // iterate through each sync setting item and start sync.
-
                 loadSyncSettings();
                 if (syncSettings == null || syncSettings.Count == 0)
                 {
@@ -41,8 +40,7 @@ namespace trident
                 Sync sync = new Sync(syncSettings);
                 sync.start();
 
-                log.Info("Completing backup!!!");
-                log.Error("some error");
+                log.Info("Backup complete!!!");
             }
             catch (Exception ex)
             {
@@ -69,6 +67,11 @@ namespace trident
                 {
                     throw new InvalidOperationException("Cannot find AWSProfileName property or value in app.config file.");
                 }
+                string fileExtensions = ConfigurationManager.AppSettings["FileExtensionExclusions"];
+                if (fileExtensions == null)
+                {
+                    throw new InvalidOperationException("Cannot find FileExtensionExclusions property or value in app.config file.");
+                }
                 // find out current executing directory through Assembly class to make sure if console app is started through other process such as task schedular.
                 string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
                 // verify values of the properties are valid. 
@@ -80,34 +83,47 @@ namespace trident
                 if (!File.Exists(currentDirPath + "\\" + settingsFileName))
                 {
                     throw new InvalidOperationException("Cannot find " + settingsFileName + " file in the application folder. ");
-                }
-
+                }               
             }
             catch (ConfigurationErrorsException ex)
             {
                 log.Error(ex.Message, ex);
                 throw new ConfigurationErrorsException("Error occured during readAllConfig(). ", ex);
             }
-            //catch (IOException ioex)
-            //{
-            //    log.Error(ioex.Message, ioex);
-            //    throw new IOException("Error occured during readAllCOnfig() IO Operation. ", ioex);
-            //}
-            //catch(UnauthorizedAccessException ex){
-            //    log.Error(ex.Message, ex);
-            //    throw new UnauthorizedAccessException("Error occured during readAllConfig(). The current user does not have sufficient permission to create folder in current directory.",ex);
-            //}
+            catch (IOException ioex)
+            {
+                log.Error(ioex.Message, ioex);
+                throw new IOException("Error occured during readAllCOnfig() IO Operation. ", ioex);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                log.Error(ex.Message, ex);
+                throw new UnauthorizedAccessException("Error occured during readAllConfig(). The current user does not have sufficient permission to create folder in current directory.", ex);
+            }
         }
 
         static void loadSyncSettings()
         {
-            // TODO: add file exists checks. and Exception block. 
             string strSettings = string.Empty;
             using (StreamReader r = new StreamReader(AppContext.BaseDirectory + "\\" + settingsFileName))
             {
                 strSettings = r.ReadToEnd();
             }
-            syncSettings = JsonConvert.DeserializeObject<List<Settings>>(strSettings);
+            syncSettings = JsonConvert.DeserializeObject<List<Setting>>(strSettings);
+
+            // check and validate values.
+            if (syncSettings == null || syncSettings.Count == 0) {
+                log.Error("settings.json files contains null or invalid values.");
+                throw new InvalidOperationException("settings.json files contains null or invalid values.");
+            }
+            // check for null or empty values in any setting item. 
+            foreach (var item in syncSettings)
+            {
+                if (string.IsNullOrEmpty(item.inventoryFileName) || string.IsNullOrEmpty(item.s3BucketName) || string.IsNullOrEmpty(item.sourceFolderPath)) {
+                    log.Error("one or more key/value of the settings.json file is empty or not defined. ");
+                    throw new InvalidOperationException("one or more key/value of the settings.json file is empty or not defined. ");
+                }
+            }
         }
     }
 }

@@ -1,10 +1,12 @@
 [
   {
-    "sourceFolder": "C:\\Test",
-    "s3Bucket": "my-s3-bucket-1"
+    "sourceFolderPath": "c:\\test",
+    "s3BucketName": "my-s3-bucket-1",
+    "inventoryFileName": "my-s3-bucket-1.csv"
   },
   {
-    "sourceFolder": "C:\\Test2",
-    "s3Bucket": "my-s3-bucket-2"
+    "sourceFolderPath": "\\test2\folder",
+    "s3BucketName": "my-s3-bucket-2",
+    "inventoryFileName": "my-s3-bucket-2.csv"
   }
 ]

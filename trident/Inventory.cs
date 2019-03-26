@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -9,50 +11,60 @@ namespace trident
 {
     class Inventory
     {
-        // local source folder path that are being synced to s3
-        private readonly string sourceFolderPath;
-        // folder where inventory is stored for the current source folder
-        //private readonly string s3BucketName;
         // pipe separeted list of file extensions that are need to be excluded  
-        //  from recursive file search
+        //      from recursive file search
+        // exclude files such as with extension .thumb
         private readonly string fileExclusionList;
-        private bool fullSync = true;
-        private string inventoryFilePath; 
-        public Inventory(string sourceFolderPath, string inventoryFilePath, string excludedFileExtensions)
+        private Setting setting;
+        private static string inventoryFolderName =  ConfigurationManager.AppSettings["InventoryFolderName"];
+        private static string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        public Inventory(Setting setting, string excludedFileExtensions)
         {
-            this.sourceFolderPath = sourceFolderPath;
+            this.setting = setting;
+            //this.sourceFolderPath = sourceFolderPath;
             //this.s3BucketName = inventoryFilePath;
             this.fileExclusionList = excludedFileExtensions;
         }
 
-        public void getInventory()
+        public void build()
         {
-            // find inventory file 
-            if (string.IsNullOrEmpty(sourceFolderPath))
-                return; // TODO: throw exception and log it.
-
-            this.extractInventoryFolderPath();
-            if (string.IsNullOrEmpty(inventoryFilePath))
-                return;// TODO: throw indication that could not be able to build the inventory path.
-            
+            //setting.inventoryFileName
+            // see if the inventory file exists. 
+            string inventoryFilePath = this.getInventoryFilePath();
+            // instantiate this outside the if file exists so we know if any inventory found or not.
+            List<string> fileNames = new List<string>();
             if (File.Exists(inventoryFilePath))
-                fullSync = false;
+            {
+                using (StreamReader inventoryStream = new StreamReader(inventoryFilePath))
+                {
+                    string line;
+                    while ((line = inventoryStream.ReadLine()) != null)
+                    {
+                        fileNames.Add(line);
+                    }
+                    //while (!inventoryStream.EndOfStream)
+                    //{
+                    //    fileNames.Add(inventoryStream.ReadLine());
+                    //}
+                }
+                // read content and build sorted order of file name list 
+                //      and return list.
+            }
+            //else return an empty(zero item count) list. 
 
-
+            //setting.sourceFolderPath
+            // iterate over the folder recursively and build relative paths list \iphone4\image.jpg in sorted order. 
+            //fileExclusionList
         }
 
-        public void commitInentory()
+        public void commitInventory()
         {
-
+            throw new NotImplementedException();
         }
 
-        private void extractInventoryFolderPath()
-        {
-            string[] folders = this.sourceFolderPath.Split('\\');
-            if (folders == null || folders.Count() == 0)
-                inventoryFilePath = string.Empty;
-            string sourceFolderName = folders.Last();
-            inventoryFilePath = Directory.GetCurrentDirectory() + "\\" + sourceFolderName;
+        private string getInventoryFilePath() {
+            return currentDirPath + "\\" + inventoryFolderName + "\\" + setting.inventoryFileName;
         }
     }
 }

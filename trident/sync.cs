@@ -34,9 +34,10 @@ namespace trident
         static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
         static IAmazonS3 s3;
         static ILog log = LogManager.GetLogger(typeof(Sync));
+        static string excludedFileExtensions = ConfigurationManager.AppSettings["FileExtensionExclusions"];
 
-        private List<Settings> syncSettings;
-        public Sync(List<Settings> syncSettings)
+        private List<Setting> syncSettings;
+        public Sync(List<Setting> syncSettings)
         {
             this.syncSettings = syncSettings;
         }
@@ -46,43 +47,55 @@ namespace trident
         /// </summary>
         public void start()
         {
-            if (this.syncSettings == null)
-            {
-                log.Warn("syncSettings object is null or has zero sync settings.  Please check settings.json file content");
-                return;
-            }
-            // iterate through each sync items and perform inventory and sync. 
+            // iterate through each sync items and perform inventory and sync in sequential operations. 
             foreach (var syncItem in syncSettings)
             {
-                setup(syncItem);
+                checkInitSync(syncItem);
             }                       
         }
-
-        void setup(Settings syncSetting) {
-            if (!Directory.Exists(syncSetting.sourceFolder))
+        /// <summary>
+        /// Check setting and Initialize sync of the source and destination.
+        /// </summary>
+        /// <param name="syncSetting"></param>
+        private void checkInitSync(Setting syncSetting) {
+            if (!Directory.Exists(syncSetting.sourceFolderPath))
             {
-                log.Warn(string.Format("Source Directory does not exist at {0}.", syncSetting.sourceFolder));
+                log.Error(string.Format("Could not perform sync due to source Directory does not exist at {0}.", syncSetting.sourceFolderPath));
                 return;
             }
-            Console.WriteLine(AppContext.BaseDirectory);
+
+            Task<bool> t = checkIfBucketExists(syncSetting.s3BucketName);
+            //if (!t.Result) {
+            //    log.Error(string.Format("Could not find s3 bucket: {0}. The Access Key you are using might not have proper permission to read the bucket.", syncSetting.s3Bucket));
+            //    return;
+            //}
+
+            // go to Inventory class and recursively iterate over the source folder and build file path list.
+            // read inventory file and build file path list.
+            // send both list to InventoryCore class to generate sync list. 
+            Inventory inventory = new Inventory(syncSetting, excludedFileExtensions);
+            inventory.build();
+
         }
 
-        //async Task listBuckets(string bucket)
-        //{
-        //    ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
-        //    ListObjectsV2Response res;
-        //    do
-        //    {
-        //        res = await s3.ListObjectsV2Async(req);
-        //        foreach (S3Object obj in res.S3Objects)
-        //        {
-        //            Console.WriteLine("key = {0}, size = {1}", obj.Key, obj.Size);
-        //        }
-        //        Console.WriteLine("Next cont. token {0} ", res.NextContinuationToken);
-        //        req.ContinuationToken = res.NextContinuationToken;
-        //    } while (res.IsTruncated);
+        async Task<bool> checkIfBucketExists(string bucket)
+        {
+            return await s3.DoesS3BucketExistAsync(bucket);
 
-        //}
+            //ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
+            //ListObjectsV2Response res;
+            //do
+            //{
+            //    res = await s3.ListObjectsV2Async(req);
+            //    foreach (S3Object obj in res.S3Objects)
+            //    {
+            //        Console.WriteLine("key = {0}, size = {1}", obj.Key, obj.Size);
+            //    }
+            //    Console.WriteLine("Next cont. token {0} ", res.NextContinuationToken);
+            //    req.ContinuationToken = res.NextContinuationToken;
+            //} while (res.IsTruncated);
+
+        }
 
     }
 }

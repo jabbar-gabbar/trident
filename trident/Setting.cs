@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace trident
 {
-    class Settings
+    class Setting
     {
-        public string sourceFolder;
-        public string s3Bucket;
+        public string sourceFolderPath;
+        public string s3BucketName;
+        public string inventoryFileName;
     }
 }
