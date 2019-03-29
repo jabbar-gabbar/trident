@@ -34,7 +34,6 @@ namespace trident
         static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
         static IAmazonS3 s3;
         static ILog log = LogManager.GetLogger(typeof(Sync));
-        static string excludedFileExtensions = ConfigurationManager.AppSettings["FileExtensionExclusions"];
 
         private List<Setting> syncSettings;
         public Sync(List<Setting> syncSettings)
@@ -57,7 +56,8 @@ namespace trident
         /// Check setting and Initialize sync of the source and destination.
         /// </summary>
         /// <param name="syncSetting"></param>
-        private void checkInitSync(Setting syncSetting) {
+        private void checkInitSync(Setting syncSetting)
+        {
             if (!Directory.Exists(syncSetting.sourceFolderPath))
             {
                 log.Error(string.Format("Could not perform sync due to source Directory does not exist at {0}.", syncSetting.sourceFolderPath));
@@ -73,7 +73,7 @@ namespace trident
             // go to Inventory class and recursively iterate over the source folder and build file path list.
             // read inventory file and build file path list.
             // send both list to InventoryCore class to generate sync list. 
-            Inventory inventory = new Inventory(syncSetting, excludedFileExtensions);
+            Inventory inventory = new Inventory(syncSetting);
             inventory.build();
 
         }
