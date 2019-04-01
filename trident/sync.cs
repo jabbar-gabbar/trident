@@ -16,7 +16,7 @@ namespace trident
     /// sync class start the sync process. it accepts the array of sync settings
     /// and iterate over the items and sync each directory to corresponding s3 bucket
     /// </summary>
-    class Sync
+    public class Sync
     {
         // iterate over each item and start sync.
         // for each item, do this

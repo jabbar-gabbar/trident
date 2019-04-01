@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace trident
 {
-    class Setting
+    public class Setting
     {
         public string sourceFolderPath;
         public string s3BucketName;

@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace trident
 {
-    class Inventory
+    public class Inventory
     {
         // pipe separeted list of file extensions that are need to be excluded  
         //      from recursive file search
