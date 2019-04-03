@@ -82,7 +82,6 @@ namespace trident
             }
 
             // 2. 
-            var temp = sourceFiles.Except(inventoryFiles);
             HashSet<string> hashset = new HashSet<string>();
             foreach (var item in this.inventoryFiles)
             {
