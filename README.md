@@ -1,17 +1,32 @@
 # trident
 Utility to upload and sync local folders to aws s3 bucket.
+Supported on Windows environment.
 
-Supported on windows environment.
+### Pre-requisite
+1. Visual Studio 2017 Community (free!)
+
+2. .NET Framework 4.6 or older
+
+3. Windows 7 or older
+
+4. AWS account 
 
 
-open cmd
+### Create aws credential file
+### Store cred file
+Run the following commands to create aws credential file in 'C:\users\{myuser}\.aws' folder.
+Open cmd window
 
-cd %HOMEPATH%
+    cd %HOMEPATH%
 
-mkdir .aws
+    mkdir .aws
 
-cd .aws
+    cd .aws
 
-copy NUL credentials
+    copy NUL credentials
 
 enter credentials in the file in following format. 
+
+### Build the code
+### Deploy the build
+### Schedule the auto sync
