@@ -13,7 +13,7 @@ namespace testing
         {
             var expexted = expectedFinalList_FileExclusionTest();
             InventoryCore inventoryCore = new InventoryCore(getSourceFiles(), getInventoryFiles(), getExtension(), getSetting());
-            var ret = inventoryCore.generateDelta();
+            var ret = inventoryCore.runInventory();
             Assert.AreEqual(expexted.Count, ret.Count);
         }
 
@@ -34,8 +34,8 @@ namespace testing
         {
             List<string> sourceFiles = new List<string>();
             sourceFiles.Add(@"\\big\user\iPhone\IMG_0001.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0002.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.JPG");
+            //sourceFiles.Add(@"\\big\user\iPhone\IMG_0002.JPG");
+            //sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.JPG");
             sourceFiles.Add(@"\\big\user\iPhone\IMG_0003.JPG");
             return sourceFiles;
         }

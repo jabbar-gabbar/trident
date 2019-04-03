@@ -51,7 +51,7 @@ namespace trident
 
             var sourceFiles = Directory.EnumerateFiles(setting.sourceFolderPath, "*.*", SearchOption.AllDirectories).ToList();
             InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, fileExtensions, setting);
-            inventoryCore.generateDelta();
+            inventoryCore.runInventory();
         }
 
         public void commitInventory()

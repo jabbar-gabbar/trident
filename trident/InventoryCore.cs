@@ -21,7 +21,7 @@ namespace trident
             this.syncSetting = setting;
         }
 
-        public List<string> generateDelta()
+        public List<string> runInventory()
         {
             if (this.sourceFiles == null)
                 throw new ArgumentNullException("sourceFiles", string.Format("sourceFiles object is null for folder: {0}", syncSetting.sourceFolderPath));
@@ -36,9 +36,9 @@ namespace trident
             this.removeExcludedExtensionFiles();
             if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
                 return sourceFiles;
-            List<string> finalList = sourceFiles; // save final list.
-            this.runInventory(finalList);
-            return finalList;
+            //List<string> finalList = sourceFiles; // save final list.
+            return this.generateInventory();
+            //return finalList;
         }
 
         private void removeExcludedExtensionFiles() {
@@ -51,8 +51,9 @@ namespace trident
             }
         }
 
-        private void runInventory(List<string> finalList)
+        private List<string> generateInventory()
         {
+            List<string> finalList = new List<string>();
             // 1. best case scenario.  compare first last elements and count are same. 
             // match first elements and last elements of both list.  if they are same, then most likely both list are same
             if (sourceFiles.First().Equals(inventoryFiles.First(), StringComparison.OrdinalIgnoreCase) && 
@@ -74,13 +75,28 @@ namespace trident
                     }
                     if (spotCheckSucceed)
                     {
-                        finalList.Clear(); // reset final list to zero count since there is nothing to upload.
-                        return;
+                        /*finalList.Clear();*/ // reset final list to zero count since there is nothing to upload.
+                        return finalList; // return the empty list.
                     }
                 }
             }
-            // 2. 
 
+            // 2. 
+            var temp = sourceFiles.Except(inventoryFiles);
+            HashSet<string> hashset = new HashSet<string>();
+            foreach (var item in this.inventoryFiles)
+            {
+                hashset.Add(item);
+            }
+            
+            foreach (var item in this.sourceFiles)
+            {
+                if (!hashset.Contains(item))
+                {
+                    finalList.Add(item);
+                }
+            }
+            return finalList;
         }
     }
 }
