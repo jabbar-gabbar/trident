@@ -41,7 +41,7 @@ namespace testing
         }
         private string getExtension()
         {
-            return ".db;.pdf";
+            return ".JPG;.pdf";
         }
         private Setting getSetting()
         {
@@ -57,6 +57,11 @@ namespace testing
             return sourceFiles;
         }
 
+        [TestMethod]
+        public void FileExtensionCaseInsensetive()
+        {
+
+        }
 
     }
 }

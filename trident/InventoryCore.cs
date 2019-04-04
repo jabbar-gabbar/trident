@@ -30,24 +30,45 @@ namespace trident
             if (this.excludedExtension == null)
                 throw new ArgumentException("excludedExtension", "excludedExtension string is null.");
             // sort the lists. 
-            this.sourceFiles.Sort();
-            this.inventoryFiles.Sort();
+            sourceFiles.Sort();
+            inventoryFiles.Sort();
             // remove the excluded extention files from source files.
-            this.removeExcludedExtensionFiles();
+            removeExcludedExtensionFiles();
             if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
                 return sourceFiles;
             //List<string> finalList = sourceFiles; // save final list.
-            return this.generateInventory();
+            return generateInventory();
             //return finalList;
         }
 
         private void removeExcludedExtensionFiles() {
             // remove files in sourceFiles that are excluded file extensions.
             string[] fileExtensions = this.excludedExtension.Split(';');
-            
+            Dictionary<string, List<int>> extensionIndexMap = new Dictionary<string, List<int>>();
+            for (int i = 0; i < sourceFiles.Count; i++)
+            {
+                string filePath = sourceFiles[i];
+                string extension = filePath.Substring(filePath.LastIndexOf('.'));
+                if (extensionIndexMap.ContainsKey(extension))
+                {
+                    extensionIndexMap[extension].Add(i);
+                }
+                else
+                {
+                    extensionIndexMap.Add(extension, new List<int>() { i });
+                }
+            }
+
+
             foreach (var ext in fileExtensions)
             {
                 sourceFiles.RemoveAll(x => x.EndsWith(ext));
+                //if (extensionIndexMap.ContainsKey(ext)) {
+                //    foreach (var i in extensionIndexMap[ext])
+                //    {
+                //        sourceFiles.RemoveAt(i);
+                //    }
+                //}
             }
         }
 
@@ -95,6 +116,7 @@ namespace trident
                     finalList.Add(item);
                 }
             }
+            
             return finalList;
         }
     }
