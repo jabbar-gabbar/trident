@@ -30,37 +30,37 @@ namespace trident
                 throw new ArgumentNullException("inventoryFiles", "inventoryFiles object is null.");
             if (excludedExtension == null)
                 throw new ArgumentException("excludedExtension", "excludedExtension string is null.");
-            
-            // remove the excluded extention files from source files.
-            removeExcludedExtensionFiles();
+            // filter out the excluded extention files from source files.
+            filterExcludedExtensionFiles();
             // sort the lists. 
-            //sourceFiles.Sort();
             filteredSourceFiles.Sort();
             inventoryFiles.Sort();
             if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
                 return sourceFiles;
-            //List<string> finalList = sourceFiles; // save final list.
             return generateInventory();
-            //return finalList;
         }
 
-        private void removeExcludedExtensionFiles() {
+        private void filterExcludedExtensionFiles()
+        {
             // remove files in sourceFiles that are excluded file extensions.
-            string[] fileExtensions = excludedExtension.Split(';');
-            if (fileExtensions == null || fileExtensions.Count() == 0) {
-                filteredSourceFiles = new List<string>();
-                filteredSourceFiles.AddRange(sourceFiles);
+            string[] fileExtensions = excludedExtension.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if (fileExtensions == null || fileExtensions.Count() == 0)
+            {
+                filteredSourceFiles = sourceFiles;//new List<string>();
                 return;
             }
-
-            Dictionary<string, List<string>> extensionIndexMap = new Dictionary<string, List<string>>();
-            //HashSet<string> sourceFileHash = new HashSet<string>();
+            
+            // build a case insensetive keys distionary map of extension in source file list
+            Dictionary<string, List<string>> extensionMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in sourceFiles)
             {
-                string extension = item.Substring(item.LastIndexOf('.'));
-                //sourceFileHash.Add(item);
+                string extension = string.Empty;
+                int lastIdx = item.LastIndexOf('.');
+                if(lastIdx > 0)// handles no period in file name
+                    extension = item.Substring(lastIdx);
+                //string extension = item.Substring(item.LastIndexOf('.'));
                 List<string> localList; //= new List<string>();
-                if (extensionIndexMap.TryGetValue(extension, out localList))
+                if (extensionMap.TryGetValue(extension, out localList))
                 {
                     localList.Add(item);
                 }
@@ -68,21 +68,22 @@ namespace trident
                 {
                     localList = new List<string>();
                     localList.Add(item);
-                    extensionIndexMap.Add(extension, localList);
+                    extensionMap.Add(extension, localList);
                 }
             }
 
             foreach (var ext in fileExtensions)
             {
-                //sourceFiles.RemoveAll(x => x.EndsWith(ext));
-                if (extensionIndexMap.ContainsKey(ext))
+                string extKey = ext.LastIndexOf('.') < 0 ? "." + ext : ext; // prefix with period if user did not put period in string
+                //sourceFiles.RemoveAll(x => x.EndsWith(ext)); // inefficient solution
+                if (extensionMap.ContainsKey(ext))
                 {
-                    extensionIndexMap.Remove(ext);
+                    extensionMap.Remove(ext);
                 }                
             }
 
             filteredSourceFiles = new List<string>();
-            foreach (var item in extensionIndexMap)
+            foreach (var item in extensionMap)
             {
                 filteredSourceFiles.AddRange(item.Value);
             }
@@ -119,15 +120,15 @@ namespace trident
             }
 
             // 2. 
-            HashSet<string> hashset = new HashSet<string>();
+            HashSet<string> inventoryHash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in inventoryFiles)
             {
-                hashset.Add(item);
+                inventoryHash.Add(item);
             }
             
             foreach (var item in filteredSourceFiles)
             {
-                if (!hashset.Contains(item))
+                if (!inventoryHash.Contains(item))
                 {
                     finalList.Add(item);
                 }

@@ -8,60 +8,164 @@ namespace testing
     [TestClass]
     public class InventoryCoreTest
     {
-        [TestMethod]
-        public void FileExclusionTest()
-        {
-            var expexted = expectedFinalList_FileExclusionTest();
-            InventoryCore inventoryCore = new InventoryCore(getSourceFiles(), getInventoryFiles(), getExtension(), getSetting());
-            var ret = inventoryCore.runInventory();
-            Assert.AreEqual(expexted.Count, ret.Count);
-        }
-
-
-
-        private List<string> getSourceFiles()
-        {
-            List<string> sourceFiles = new List<string>();
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0001.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0002.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0003.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.pdf");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\thumbs.db");
-            return sourceFiles;
-        }
-        private List<string> getInventoryFiles()
-        {
-            List<string> sourceFiles = new List<string>();
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0001.JPG");
-            //sourceFiles.Add(@"\\big\user\iPhone\IMG_0002.JPG");
-            //sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0003.JPG");
-            return sourceFiles;
-        }
-        private string getExtension()
-        {
-            return ".JPG;.pdf";
-        }
         private Setting getSetting()
         {
             return new Setting() { inventoryFileName = "my-s3-bucket-1.csv", s3BucketName = "my-s3-bucket-1", sourceFolderPath = "c:\\test" };
         }
-        private List<string> expectedFinalList_FileExclusionTest()
+
+        [TestMethod]
+        public void FileExt_Excluded()
         {
             List<string> sourceFiles = new List<string>();
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0001.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0002.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0003.JPG");
-            sourceFiles.Add(@"\\big\user\iPhone\IMG_0004.JPG");
-            return sourceFiles;
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".PDF");
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            
+            Assert.AreEqual(false, actual.Exists(x => x.ToLower().EndsWith(".pdf")));
+            Assert.AreEqual(true, actual.Exists(x => x.ToLower().EndsWith(".jpg")));
+        }
+                
+        [TestMethod]
+        public void FileExt_CaseInsensetive()
+        {
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".PDF");
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(2, actual.Count);
         }
 
         [TestMethod]
-        public void FileExtensionCaseInsensetive()
+        public void FileExt_EmptyFilterString()
         {
-
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".PDF");
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = "";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual.Count);
+            extFilter = ";";
+            inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual2 = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual2.Count);
         }
 
+        // test file without extension (.) in the file name
+        [TestMethod]
+        public void FileExt_WithougExtensionInASourceFile()
+        {
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i);
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = ".pdf;;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual.Count);
+            extFilter = "";
+            inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual2 = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual2.Count);
+        }
+
+        // test file without extension (.) in the file name
+        [TestMethod]
+        public void FileExt_WithougExtensionInA_Source_Inventory_Files()
+        {
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i);
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 5; i < 7; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i);
+            }
+            string extFilter = ".pdf;;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual.Count);
+            extFilter = "";
+            inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual2 = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual2.Count);
+        }
+
+        // test extension without . in the filter string.
+        [TestMethod]
+        public void FileExt_WithoutDotInFilterString()
+        {
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".PDF");
+            }
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = "pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(7, actual.Count);
+        }
     }
 }
