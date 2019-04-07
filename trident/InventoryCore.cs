@@ -52,22 +52,22 @@ namespace trident
             
             // build a case insensetive keys distionary map of extension in source file list
             Dictionary<string, List<string>> extensionMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
-            foreach (var item in sourceFiles)
+            foreach (var file in sourceFiles)
             {
                 string extension = string.Empty;
-                int lastIdx = item.LastIndexOf('.');
+                int lastIdx = file.LastIndexOf('.');
                 if(lastIdx > 0)// handles no period in file name
-                    extension = item.Substring(lastIdx);
+                    extension = file.Substring(lastIdx);
                 //string extension = item.Substring(item.LastIndexOf('.'));
                 List<string> localList; //= new List<string>();
                 if (extensionMap.TryGetValue(extension, out localList))
                 {
-                    localList.Add(item);
+                    localList.Add(file);
                 }
                 else
                 {
                     localList = new List<string>();
-                    localList.Add(item);
+                    localList.Add(file);
                     extensionMap.Add(extension, localList);
                 }
             }
@@ -104,7 +104,7 @@ namespace trident
                     // spot check 10% indexes for similarities. 
                     double countToCheck = Math.Floor(srcCount * 0.1) + 1; // 10% of total + 1 count to check
                     int checkInterval = (int)Math.Floor(srcCount / countToCheck);
-                    for (int i = checkInterval; i < srcCount; i = +checkInterval)
+                    for (int i = checkInterval; i < srcCount; i += checkInterval)
                     {
                         if (!filteredSourceFiles[i].Equals(inventoryFiles[i], StringComparison.OrdinalIgnoreCase)) {
                             spotCheckSucceed = false;
@@ -132,8 +132,7 @@ namespace trident
                 {
                     finalList.Add(item);
                 }
-            }
-            
+            }            
             return finalList;
         }
     }
