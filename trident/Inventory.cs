@@ -23,7 +23,7 @@ namespace trident
             this.setting = setting;
         }
 
-        public void build()
+        public List<string> build()
         {
             //setting.inventoryFileName
             // see if the inventory file exists. 
@@ -37,7 +37,7 @@ namespace trident
                     string line;
                     while ((line = inventoryStream.ReadLine()) != null)
                     {
-                        inventoryFiles.Add(line);
+                        inventoryFiles.Add(line); // TODO: Assumption is that the file is never modified manually by user.
                     }
                 }
                 // read content of file name list and return list.
@@ -46,15 +46,15 @@ namespace trident
 
             //setting.sourceFolderPath
             // iterate over the folder recursively and build relative paths list \iphone4\image.jpg in without order. 
-            //fileExclusionList
+            
             string fileExtensions = ConfigurationManager.AppSettings["FileExtensionExclusions"];
 
             var sourceFiles = Directory.EnumerateFiles(setting.sourceFolderPath, "*.*", SearchOption.AllDirectories).ToList();
             InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, fileExtensions, setting);
-            inventoryCore.runInventory();
+            return inventoryCore.runInventory();
         }
 
-        public void commitInventory()
+        public void commit()
         {
             throw new NotImplementedException();
         }

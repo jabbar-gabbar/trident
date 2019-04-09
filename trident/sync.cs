@@ -73,9 +73,10 @@ namespace trident
             // go to Inventory class and recursively iterate over the source folder and build file path list.
             // read inventory file and build file path list.
             // send both list to InventoryCore class to generate sync list. 
-            Inventory inventory = new Inventory(syncSetting);
-            inventory.build();
-
+            Inventory inventory = new Inventory(syncSetting);// TODO: try catch to continue to next sync item.
+            List<string> finalList = inventory.build();
+            Upload upload = new Upload(finalList);
+            upload.start();//implement inventory.commit(); inside start().
         }
 
         async Task<bool> checkIfBucketExists(string bucket)

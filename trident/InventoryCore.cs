@@ -29,14 +29,16 @@ namespace trident
             if (inventoryFiles == null)
                 throw new ArgumentNullException("inventoryFiles", "inventoryFiles object is null.");
             if (excludedExtension == null)
-                throw new ArgumentException("excludedExtension", "excludedExtension string is null.");
+                throw new ArgumentNullException("excludedExtension", "excludedExtension string is null.");
+            if (sourceFiles.Count == 0)
+                return sourceFiles;
             // filter out the excluded extention files from source files.
             filterExcludedExtensionFiles();
             // sort the lists. 
             filteredSourceFiles.Sort();
             inventoryFiles.Sort();
             if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
-                return sourceFiles;
+                return filteredSourceFiles;
             return generateInventory();
         }
 

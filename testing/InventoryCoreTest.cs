@@ -35,11 +35,11 @@ namespace testing
             string extFilter = ".pdf;";
             InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
             List<string> actual = inventoryCore.runInventory();
-            
+
             Assert.AreEqual(false, actual.Exists(x => x.ToLower().EndsWith(".pdf")));
             Assert.AreEqual(true, actual.Exists(x => x.ToLower().EndsWith(".jpg")));
         }
-                
+
         [TestMethod]
         public void FileExt_CaseInsensetive()
         {
@@ -179,7 +179,7 @@ namespace testing
             {
                 sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
             }
-            
+
             List<string> inventoryFiles = new List<string>();
             for (int i = 1; i < 50; i++)
             {
@@ -239,7 +239,7 @@ namespace testing
             for (int i = 1; i < 5; i++) //amomalies
             {
                 sourceFiles.Add(@"\\big\user\iPhone\B_IMG_000" + i + ".JPG");
-            } 
+            }
             List<string> inventoryFiles = new List<string>();
             for (int i = 1; i < 30; i++)
             {
@@ -268,7 +268,7 @@ namespace testing
             {
                 sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
             }
-            
+
             List<string> inventoryFiles = new List<string>();
             for (int i = 1; i < 160000; i++)
             {
@@ -282,5 +282,76 @@ namespace testing
             List<string> actual = inventoryCore.runInventory();
             Assert.AreEqual(40000, actual.Count);
         }
+
+        [TestMethod]
+        public void ZeroInventoryFileItems()
+        {
+            List<string> sourceFiles = new List<string>();
+            for (int i = 1; i < 5; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".JPG");
+            }
+            for (int i = 5; i < 10; i++)
+            {
+                sourceFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".PDF");
+            }
+            List<string> inventoryFiles = new List<string>(); // zero inventory files.
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(4, actual.Count);
+        }
+
+        [TestMethod]
+        public void ZeroSourceFileItems()
+        {
+            List<string> sourceFiles = new List<string>();           
+            
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            List<string> actual = inventoryCore.runInventory();
+            Assert.AreEqual(0, actual.Count);
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException), "asdfdsa")]
+        public void Error_OnNull_source_Files()
+        {
+            List<string> sourceFiles = null;
+            List<string> inventoryFiles = new List<string>();
+            for (int i = 1; i < 3; i++)
+            {
+                inventoryFiles.Add(@"\\big\user\iPhone\IMG_000" + i + ".jpg");
+            }
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            inventoryCore.runInventory();
+        }
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException), "")]
+        public void Error_OnNull_inventory_Files()
+        {
+            List<string> sourceFiles = new List<string>();
+            List<string> inventoryFiles = null;
+            string extFilter = ".pdf;";
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            inventoryCore.runInventory();
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentNullException), "")]
+        public void Error_OnNull_excluded_Extension()
+        {
+            List<string> sourceFiles = new List<string>();
+            List<string> inventoryFiles = new List<string>();
+            string extFilter = null;
+            InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
+            inventoryCore.runInventory();
+        }
+
     }
 }
