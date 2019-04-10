@@ -75,7 +75,7 @@ namespace trident
             // send both list to InventoryCore class to generate sync list. 
             Inventory inventory = new Inventory(syncSetting);// TODO: try catch to continue to next sync item.
             List<string> finalList = inventory.build();
-            Upload upload = new Upload(finalList);
+            Upload upload = new Upload(finalList, syncSetting);
             upload.start();//implement inventory.commit(); inside start().
         }
 

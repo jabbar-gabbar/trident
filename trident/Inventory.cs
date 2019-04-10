@@ -6,17 +6,16 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using log4net;
 
 namespace trident
 {
     public class Inventory
     {
-        // pipe separeted list of file extensions that are need to be excluded  
-        //      from recursive file search
         private Setting setting;
         private static string inventoryFolderName =  ConfigurationManager.AppSettings["InventoryFolderName"];
         private static string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        
+        private static ILog log = LogManager.GetLogger(typeof(Inventory));
 
         public Inventory(Setting setting)
         {
@@ -54,12 +53,29 @@ namespace trident
             return inventoryCore.runInventory();
         }
 
-        public void commit()
+        public void commit(List<string> inventoryList)
         {
-            throw new NotImplementedException();
+            string files = Environment.NewLine;
+            inventoryList.ForEach(x => files += x + Environment.NewLine);
+            log.Info(string.Format("Source Folder: {0}, Committing count: {1}. Files: {2}", setting.sourceFolderPath, inventoryList.Count, files));
+
+            string inventoryFilePath = this.getInventoryFilePath();
+
+            using (StreamWriter inventoryStream = new StreamWriter(inventoryFilePath))
+            {
+                inventoryStream.Write(files);
+                //string line;
+                //while ((line = inventoryStream.ReadLine()) != null)
+                //{
+                //    //inventoryList.Add(line); // TODO: Assumption is that the file is never modified manually by user.
+                //}
+            }
+            // read content of file name list and return list.
+
         }
 
-        private string getInventoryFilePath() {
+        private string getInventoryFilePath()
+        {
             return currentDirPath + "\\" + inventoryFolderName + "\\" + setting.inventoryFileName;
         }
     }
