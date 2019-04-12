@@ -15,7 +15,6 @@ namespace trident
         private Setting setting;
         private static string inventoryFolderName =  ConfigurationManager.AppSettings["InventoryFolderName"];
         private static string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-        private static ILog log = LogManager.GetLogger(typeof(Inventory));
 
         public Inventory(Setting setting)
         {
@@ -55,23 +54,16 @@ namespace trident
 
         public void commit(List<string> inventoryList)
         {
-            string files = Environment.NewLine;
-            inventoryList.ForEach(x => files += x + Environment.NewLine);
-            log.Info(string.Format("Source Folder: {0}, Committing count: {1}. Files: {2}", setting.sourceFolderPath, inventoryList.Count, files));
+            string files = string.Empty;
+            inventoryList.ForEach(x => files += x + "\r\n");
+            //log.Info(string.Format("Source Folder: {0}, Committing count: {1}. Files: {2}", setting.sourceFolderPath, inventoryList.Count, files));
 
             string inventoryFilePath = this.getInventoryFilePath();
 
-            using (StreamWriter inventoryStream = new StreamWriter(inventoryFilePath))
+            using (StreamWriter inventoryStream = File.AppendText(inventoryFilePath))
             {
-                inventoryStream.Write(files);
-                //string line;
-                //while ((line = inventoryStream.ReadLine()) != null)
-                //{
-                //    //inventoryList.Add(line); // TODO: Assumption is that the file is never modified manually by user.
-                //}
+                inventoryStream.Write(files); // TODO: Assumption is that the file is never modified manually by user.
             }
-            // read content of file name list and return list.
-
         }
 
         private string getInventoryFilePath()

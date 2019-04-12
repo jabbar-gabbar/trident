@@ -1,5 +1,5 @@
 # trident
-Utility to upload local and network folders data to aws s3 bucket.
+A tool to upload local and network folders data to aws s3 bucket.
 Supported on Windows environment.
 
 ### Pre-requisite
@@ -8,15 +8,16 @@ Supported on Windows environment.
 3. .NET Framework 4.6 or older
 4. An AWS account [(link)](https://aws.amazon.com/)
 
-> **Note**: You are responsilble for any cost associated with using AWS services. 
+> **Important**: You are responsilble for any cost associated with using AWS services. 
 
-> **Note**: You are also responsible to configure security on your AWS account to protect your data on AWS.
+> **Note**: You are responsible to configure security as per the best practices on your AWS account to protect your data on AWS.
 ### Compile
 Install Visual Studio 2017 (VS) on Win 7 or later.
 Make sure .NET Framework 4.6 or later is installed.
 Clone or download the souce code zip from this github project [(download link)](https://github.com/jabbar-gabbar/trident/archive/master.zip) and compile it using VS. The complier will generate app binaries.
 
 ### AWS setup
+This utility uses aws s3 API to upload objects(files) to aws. 
 #### Create aws credential file
 #### Store cred file
 Run the following commands to create aws credential file in 'C:\users\{myuser}\.aws' folder.
