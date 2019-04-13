@@ -13,5 +13,10 @@
     "sourceFolderPath": "C:\\Test2",
     "s3BucketName": "ahahaha",
     "inventoryFileName": "my-s3-bucket-3.csv"
+  },
+  {
+    "sourceFolderPath": "\\\\big\\usr",
+    "s3BucketName": "my-s3-bucket-2",
+    "inventoryFileName": "my-s3-urs.csv"
   }
 ]

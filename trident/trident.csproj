@@ -82,6 +82,7 @@
     <Compile Include="Setting.cs" />
     <Compile Include="Sync.cs" />
     <Compile Include="Upload.cs" />
+    <Compile Include="UploadCore.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">
