@@ -1,4 +1,5 @@
 ﻿using Amazon.S3;
+using log4net;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace trident
     public class UploadCore
     {
         private readonly IAmazonS3 s3Client;
+        private static ILog log = LogManager.GetLogger(typeof(UploadCore));
+
         private string sourceFilePath;
         private Setting setting;
         public UploadCore(string sourceFilePath, Setting setting)
@@ -23,16 +26,16 @@ namespace trident
             bool success = false;
             try
             {
-
                 getObjectName();
                 success = true;
             }
+            catch (InvalidOperationException ex)
+            {
+                log.Error(ex);
+            }
             catch (Exception ex)
             {
-                //todo:log
-            }
-            finally
-            {
+                log.Error(string.Format("Error. Path:{0}, {1} ",sourceFilePath, setting.sourceFolderPath), ex);
             }
             return success;
         }
