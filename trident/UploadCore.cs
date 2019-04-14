@@ -23,12 +23,13 @@ namespace trident
             bool success = false;
             try
             {
-                
 
+                getObjectName();
                 success = true;
             }
             catch (Exception ex)
             {
+                //todo:log
             }
             finally
             {
@@ -37,7 +38,6 @@ namespace trident
         }
 
         public string getObjectName() {
-            string objectName = string.Empty;
             if (string.IsNullOrEmpty(sourceFilePath))
             {
                 // log error.
@@ -52,9 +52,9 @@ namespace trident
             // sourceFilePath =            \\big\usr\folder\IMG_20190413_081415.jpg
             // Assumption is that since the sourceFilePath is retrieved using setting.sourceFolderPath in Inventory.cs, 
             // it should contain the beginning sequences.  just remove those chars to make object name. 
-            objectName = sourceFilePath.Substring(folderPathLength).Replace(@"\", "/");
-            if (objectName.First() == '/') {
-                objectName.Remove(0);
+            string objectName = sourceFilePath.Substring(folderPathLength).Replace(@"\", "/");
+            if (objectName[0] == '/') {
+                objectName = objectName.Remove(0,1);
             }
             return objectName;
         }

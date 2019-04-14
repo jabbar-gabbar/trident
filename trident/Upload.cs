@@ -29,7 +29,8 @@ namespace trident
             foreach (var filePath in finalList)
             {
                 // upload file using UploadCore.
-                //UploadCore uploadCore = new UploadCore();
+                UploadCore uploadCore = new UploadCore(filePath, setting);
+                uploadCore.upload();
                 // var result = uploadCore.upload(filePath, setting);
                 // TODO: if successful upload, do next four lines. 
                 inventoryList.Add(filePath);
