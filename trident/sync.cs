@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Configuration;
 using log4net;
+using Amazon.S3.Transfer;
 
 namespace trident
 {
@@ -32,7 +33,7 @@ namespace trident
 
         static readonly RegionEndpoint regionEndpoint = RegionEndpoint.USEast1;
         static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
-        static IAmazonS3 s3;
+        static IAmazonS3 s3Client;
         static ILog log = LogManager.GetLogger(typeof(Sync));
 
         private List<Setting> syncSettings;
@@ -65,11 +66,12 @@ namespace trident
             }
 
             Task<bool> t = checkIfBucketExists(syncSetting.s3BucketName);
-            //if (!t.Result) {
-            //    log.Error(string.Format("Could not find s3 bucket: {0}. The Access Key you are using might not have proper permission to read the bucket.", syncSetting.s3Bucket));
-            //    return;
-            //}
-
+            if (!t.Result)
+            {
+                log.Error(string.Format("Could not find s3 bucket: {0}. The Access Key you are using might not have proper permission to read the bucket.", syncSetting.s3BucketName));
+                return;
+            }
+            abortS3MultipartUploadJob(syncSetting.s3BucketName).Wait();
             // go to Inventory class and recursively iterate over the source folder and build file path list.
             // read inventory file and build file path list.
             // send both list to InventoryCore class to generate sync list. 
@@ -79,9 +81,33 @@ namespace trident
             upload.start();//implement inventory.commit(); inside start().
         }
 
+        private async Task abortS3MultipartUploadJob(string bucketName)
+        {
+            try
+            {
+                var transferUtility = new TransferUtility(s3Client);
+
+                // Abort all in-progress uploads initiated before today - 7 days.
+                await transferUtility.AbortMultipartUploadsAsync(bucketName, DateTime.Now.AddDays(-7));
+            }
+            catch (AmazonS3Exception ex)
+            {
+                log.Error("Error encountered on server. Message:'{0}' when aborting multipart upload.", ex);           
+            }
+            catch (Exception ex)
+            {
+                log.Error("Unknown encountered on server. Message:'{0}' when writing an object", ex);
+            }
+        }
+
         async Task<bool> checkIfBucketExists(string bucket)
         {
-            return await s3.DoesS3BucketExistAsync(bucket);
+            s3Client = new AmazonS3Client(); // aws region is set by app.config automatically. since we are using s3, it does not matter becuase it is a global.
+            // abort multi part upload started on today - 7 days.
+            var transferUtlity = new TransferUtility(s3Client);
+
+
+            return await s3Client.DoesS3BucketExistAsync(bucket);
 
             //ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
             //ListObjectsV2Response res;
