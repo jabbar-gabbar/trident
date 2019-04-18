@@ -72,6 +72,7 @@ namespace trident
                 return;
             }
             abortS3MultipartUploadJob(syncSetting.s3BucketName).Wait();
+
             // go to Inventory class and recursively iterate over the source folder and build file path list.
             // read inventory file and build file path list.
             // send both list to InventoryCore class to generate sync list. 
@@ -92,23 +93,30 @@ namespace trident
             }
             catch (AmazonS3Exception ex)
             {
-                log.Error("Error encountered on server. Message:'{0}' when aborting multipart upload.", ex);           
+                log.Error("S3 Error encountered on server. Message:'{0}' when aborting multipart upload.", ex);           
             }
             catch (Exception ex)
             {
-                log.Error("Unknown encountered on server. Message:'{0}' when writing an object", ex);
+                log.Error("Unknown S3 encountered on server. Message:'{0}' when aborting multipart upload.", ex);
             }
         }
 
         async Task<bool> checkIfBucketExists(string bucket)
-        {
-            s3Client = new AmazonS3Client(); // aws region is set by app.config automatically. since we are using s3, it does not matter becuase it is a global.
-            // abort multi part upload started on today - 7 days.
-            var transferUtlity = new TransferUtility(s3Client);
-
-
-            return await s3Client.DoesS3BucketExistAsync(bucket);
-
+        {            
+            try
+            {
+                s3Client = new AmazonS3Client(); 
+                return await s3Client.DoesS3BucketExistAsync(bucket);                
+            }
+            catch (AmazonS3Exception ex)
+            {
+                log.Error("S3 Error encountered on server. Message:'{0}' when checking bucket exists.", ex);
+            }
+            catch (Exception ex)
+            {
+                log.Error("Unknown S3 error on server. Message:'{0}' when checking bucket exists.", ex);
+            }
+            return false;
             //ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
             //ListObjectsV2Response res;
             //do
