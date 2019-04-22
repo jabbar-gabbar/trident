@@ -50,11 +50,12 @@ namespace trident
             // iterate through each sync items and perform inventory and sync in sequential operations. 
             foreach (var syncItem in syncSettings)
             {
+                log.Info(string.Format("Starting sync of sourceFolderPath={0}.", syncItem.sourceFolderPath));
                 checkInitSync(syncItem);
-            }                       
+            }
         }
         /// <summary>
-        /// Check setting and Initialize sync of the source and destination.
+        /// Check setting and Initialize sync of the source to destination.
         /// </summary>
         /// <param name="syncSetting"></param>
         private void checkInitSync(Setting syncSetting)
@@ -65,10 +66,11 @@ namespace trident
                 return;
             }
 
+            // perform few s3 operations for checking.  
             Task<bool> t = checkIfBucketExists(syncSetting.s3BucketName);
             if (!t.Result)
             {
-                log.Error(string.Format("Could not find s3 bucket: {0}. The Access Key you are using might not have proper permission to read the bucket.", syncSetting.s3BucketName));
+                log.Error(string.Format("Could not find s3 bucket={0}. The Access Key you are using might not have proper permission to read the bucket.", syncSetting.s3BucketName));
                 return;
             }
             abortS3MultipartUploadJob(syncSetting.s3BucketName).Wait();
@@ -79,7 +81,7 @@ namespace trident
             Inventory inventory = new Inventory(syncSetting);// TODO: try catch to continue to next sync item.
             List<string> finalList = inventory.build();
             Upload upload = new Upload(finalList, syncSetting);
-            upload.start();//implement inventory.commit(); inside start().
+            upload.start(); // start the upload process.
         }
 
         private async Task abortS3MultipartUploadJob(string bucketName)
@@ -93,44 +95,30 @@ namespace trident
             }
             catch (AmazonS3Exception ex)
             {
-                log.Error("S3 Error encountered on server. Message:'{0}' when aborting multipart upload.", ex);           
+                log.Error("S3 Error encountered on server when aborting multipart upload.", ex);
             }
             catch (Exception ex)
             {
-                log.Error("Unknown S3 encountered on server. Message:'{0}' when aborting multipart upload.", ex);
+                log.Error("Unknown S3 encountered on server when aborting multipart upload.", ex);
             }
         }
 
         async Task<bool> checkIfBucketExists(string bucket)
-        {            
+        {
             try
             {
-                s3Client = new AmazonS3Client(); 
-                return await s3Client.DoesS3BucketExistAsync(bucket);                
+                s3Client = new AmazonS3Client();
+                return await s3Client.DoesS3BucketExistAsync(bucket);
             }
             catch (AmazonS3Exception ex)
             {
-                log.Error("S3 Error encountered on server. Message:'{0}' when checking bucket exists.", ex);
+                log.Error(string.Format("S3 Error encountered on server when checking bucket exists, bucket={0}", bucket), ex);
             }
             catch (Exception ex)
             {
-                log.Error("Unknown S3 error on server. Message:'{0}' when checking bucket exists.", ex);
+                log.Error(string.Format("Unknown S3 error on server when checking bucket exists. bucket={0}", bucket), ex);
             }
             return false;
-            //ListObjectsV2Request req = new ListObjectsV2Request() { BucketName = bucket, MaxKeys = 2 };
-            //ListObjectsV2Response res;
-            //do
-            //{
-            //    res = await s3.ListObjectsV2Async(req);
-            //    foreach (S3Object obj in res.S3Objects)
-            //    {
-            //        Console.WriteLine("key = {0}, size = {1}", obj.Key, obj.Size);
-            //    }
-            //    Console.WriteLine("Next cont. token {0} ", res.NextContinuationToken);
-            //    req.ContinuationToken = res.NextContinuationToken;
-            //} while (res.IsTruncated);
-
         }
-
     }
 }

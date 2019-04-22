@@ -30,13 +30,15 @@ namespace trident
             {
                 // upload file using UploadCore.
                 UploadCore uploadCore = new UploadCore(filePath, setting);
-                uploadCore.upload();
-                // var result = uploadCore.upload(filePath, setting);
-                // TODO: if successful upload, do next four lines. 
-                inventoryList.Add(filePath);
-                totalUploadCount++;
-                batchCount++;
-                lastfile = filePath;
+
+                // if successful upload, do next four lines. 
+                if (uploadCore.upload())
+                {
+                    inventoryList.Add(filePath);
+                    totalUploadCount++;
+                    batchCount++;
+                    lastfile = filePath;
+                }
                 if (batchCount >= 10) // commit inventory in batch of 10 files to not loose work in abrupt termination.
                 {
                     commitInventory(inventoryList, out batchCount);
