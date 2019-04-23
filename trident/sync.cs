@@ -50,7 +50,7 @@ namespace trident
             // iterate through each sync items and perform inventory and sync in sequential operations. 
             foreach (var syncItem in syncSettings)
             {
-                log.Info(string.Format("Starting sync of sourceFolderPath={0}.", syncItem.sourceFolderPath));
+                log.Info(string.Format("Starting sync of sourceFolderPath={0}, s3 bucket={1}", syncItem.sourceFolderPath, syncItem.s3BucketName));
                 checkInitSync(syncItem);
             }
         }

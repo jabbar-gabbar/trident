@@ -21,12 +21,11 @@ namespace trident
         {
             try
             {
-                //XmlConfigurator.Configure(); // optional way to load log4net config from app.config
                 if (log.IsInfoEnabled)
                 {
                     log.Info("Starting trident backup...");
                 }
-                // Check for configuration are in proper state. 
+                // Check all configurations are in proper state. 
                 readAllConfig();
                 // load settings.json file and retrieve sync settings
                 // iterate through each sync setting item and start sync.
@@ -56,21 +55,25 @@ namespace trident
                 settingsFileName = ConfigurationManager.AppSettings["SettingsFileName"];
                 if (string.IsNullOrEmpty(settingsFileName))
                 {
-                    throw new InvalidOperationException("Cannot find SettingsFileName property or value in app.config file.");
+                    throw new InvalidOperationException("Cannot find SettingsFileName property or value in appSettings section of app.config file.");
                 }
                 string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
                 if (string.IsNullOrEmpty(inventoryFolderName))
                 {
-                    throw new InvalidOperationException("Cannot find InventoryFolderName property or value in app.config file.");
+                    throw new InvalidOperationException("Cannot find InventoryFolderName property or value in appSettings section of app.config file.");
                 }
                 if (string.IsNullOrEmpty(ConfigurationManager.AppSettings["AWSProfileName"]))
                 {
-                    throw new InvalidOperationException("Cannot find AWSProfileName property or value in app.config file.");
+                    throw new InvalidOperationException("Cannot find AWSProfileName property or value in appSettings section of app.config file.");
+                }
+                if (string.IsNullOrEmpty(ConfigurationManager.AppSettings["AWSRegion"]))
+                {
+                    throw new InvalidOperationException("Cannot find AWSRegion property or value in appSettings section of app.config file.");
                 }
                 string fileExtensions = ConfigurationManager.AppSettings["FileExtensionExclusions"];
-                if (fileExtensions == null)
+                if (fileExtensions == null) // only check for null, dont check for empty because empty is a valid value.
                 {
-                    throw new InvalidOperationException("Cannot find FileExtensionExclusions property or value in app.config file.");
+                    throw new InvalidOperationException("Cannot find FileExtensionExclusions key in appSettings section of app.config file. This app at least requires the 'key' and an empty 'value' present in the app.config. ");
                 }
                 // find out current executing directory through Assembly class to make sure if console app is started through other process such as task schedular.
                 string currentDirPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -82,8 +85,8 @@ namespace trident
                 }
                 if (!File.Exists(currentDirPath + "\\" + settingsFileName))
                 {
-                    throw new InvalidOperationException("Cannot find " + settingsFileName + " file in the application folder. ");
-                }               
+                    throw new InvalidOperationException(string.Format("Cannot find file:{0} in the application folder:{1}. ", settingsFileName, currentDirPath));
+                }
             }
             catch (ConfigurationErrorsException ex)
             {
