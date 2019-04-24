@@ -1,6 +1,5 @@
 ﻿using Amazon;
 using Amazon.S3;
-using Amazon.S3.Model;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -20,18 +19,16 @@ namespace trident
     public class Sync
     {
         // iterate over each item and start sync.
-        // for each item, do this
-        // 1. query somehow the total count of the object in the bucket
-        // if count is zero,  start full sync. 
-        // in the full sync, use multipart upload to upload the object. log error. 
-        // if count is not zero, start daily sync.
+        // for each item, 
+        // perform inventory from the local inventory file stored in the folder. 
+        // if first time programs runs or if you add new folder to sync,  it will perform full sync of that setting.
+        // in the full sync, use multipart s3 upload to upload the object. 
 
-        // in delta sync, retrieve all key ids and arrange them in sequential order. TBD more details
+        // in delta sync, retrieve all key ids and arrange them in sequential order. 
         //      query source folder and arrange file names in sequential order. 
         //      match first element if matches, find last element of the key in sorted source collection. 
-        //      retreive all elements that comes after that. sync all that files to s3. 
+        //      retreive all elements that comes after that. sync all that files to s3 using multipart upload. 
 
-        static readonly RegionEndpoint regionEndpoint = RegionEndpoint.USEast1;
         static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
         static IAmazonS3 s3Client;
         static ILog log = LogManager.GetLogger(typeof(Sync));
@@ -60,6 +57,7 @@ namespace trident
         /// <param name="syncSetting"></param>
         private void checkInitSync(Setting syncSetting)
         {
+            // TODO: wrap this method with try catch to prevent one fail all fail situation. 
             if (!Directory.Exists(syncSetting.sourceFolderPath))
             {
                 log.Error(string.Format("Could not perform sync due to source Directory does not exist at {0}.", syncSetting.sourceFolderPath));
@@ -78,7 +76,7 @@ namespace trident
             // go to Inventory class and recursively iterate over the source folder and build file path list.
             // read inventory file and build file path list.
             // send both list to InventoryCore class to generate sync list. 
-            Inventory inventory = new Inventory(syncSetting);// TODO: try catch to continue to next sync item.
+            Inventory inventory = new Inventory(syncSetting);
             List<string> finalList = inventory.build();
             Upload upload = new Upload(finalList, syncSetting);
             upload.start(); // start the upload process.

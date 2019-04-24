@@ -34,11 +34,13 @@ namespace trident
                 return sourceFiles;
             // filter out the excluded extention files from source files.
             filterExcludedExtensionFiles();
+            
+            if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
+                return filteredSourceFiles;
             // sort the lists. 
             filteredSourceFiles.Sort();
             inventoryFiles.Sort();
-            if (inventoryFiles.Count == 0) // no files in inventory, that means sync entire source folder.
-                return filteredSourceFiles;
+
             return generateInventory();
         }
 
@@ -46,22 +48,25 @@ namespace trident
         {
             // remove files in sourceFiles that are excluded file extensions.
             string[] fileExtensions = excludedExtension.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            if (fileExtensions == null || fileExtensions.Count() == 0)
+            if (fileExtensions == null || fileExtensions.Count() == 0) 
             {
-                filteredSourceFiles = sourceFiles;//new List<string>();
+                // no filter specified in the config setting. so potentially sync all source files to s3. 
+                filteredSourceFiles = sourceFiles;  // set and returns filtersourcefile ref which points to sourceFiles object.   
                 return;
             }
-            
-            // build a case insensetive keys distionary map of extension in source file list
+
+            // build a case insensetive keys distionary map of extensions from source file list
             Dictionary<string, List<string>> extensionMap = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
             foreach (var file in sourceFiles)
             {
                 string extension = string.Empty;
                 int lastIdx = file.LastIndexOf('.');
-                if(lastIdx > 0)// handles no period in file name
+
+                // Below handles no period in file name, lastIdx = -1, e.g C:\users\me\photos\IMG_file_withoug_extension. 
+                //   all files with no extensions are added to empty key in the map. 
+                if (lastIdx > 0)
                     extension = file.Substring(lastIdx);
-                //string extension = item.Substring(item.LastIndexOf('.'));
-                List<string> localList; //= new List<string>();
+                List<string> localList; 
                 if (extensionMap.TryGetValue(extension, out localList))
                 {
                     localList.Add(file);
@@ -76,15 +81,16 @@ namespace trident
 
             foreach (var ext in fileExtensions)
             {
-                string extKey = ext.LastIndexOf('.') < 0 ? "." + ext : ext; // prefix with period if user did not put period in string
-                //sourceFiles.RemoveAll(x => x.EndsWith(ext)); // inefficient solution
-                if (extensionMap.ContainsKey(ext))
+                // prefix with period if user did not put period in string
+                string extKey = ext.LastIndexOf('.') < 0 ? "." + ext : ext; 
+                if (extensionMap.ContainsKey(extKey))
                 {
-                    extensionMap.Remove(ext);
-                }                
+                    extensionMap.Remove(extKey);// removes the whole key with its values based on filter keys.
+                }
+                //sourceFiles.RemoveAll(x => x.EndsWith(ext)); // inefficient solution for large collections. 
             }
 
-            filteredSourceFiles = new List<string>();
+            filteredSourceFiles = new List<string>(); //store filtered list here. 
             foreach (var item in extensionMap)
             {
                 filteredSourceFiles.AddRange(item.Value);

@@ -30,11 +30,6 @@ namespace trident
                 // load settings.json file and retrieve sync settings
                 // iterate through each sync setting item and start sync.
                 loadSyncSettings();
-                if (syncSettings == null || syncSettings.Count == 0)
-                {
-                    log.Warn("syncSettings object is null or has zero sync settings.  Please check settings.json file content");
-                    return;
-                }
 
                 Sync sync = new Sync(syncSettings);
                 sync.start();
@@ -116,16 +111,27 @@ namespace trident
 
             // check and validate values.
             if (syncSettings == null || syncSettings.Count == 0) {
-                log.Error("settings.json files contains null or invalid values.");
-                throw new InvalidOperationException("settings.json files contains null or invalid values.");
+                log.Error("settings.json files contains null or zero settings items.");
+                throw new InvalidOperationException("settings.json files contains null or zero settings items.");
             }
             // check for null or empty values in any setting item. 
             foreach (var item in syncSettings)
             {
-                if (string.IsNullOrEmpty(item.inventoryFileName) || string.IsNullOrEmpty(item.s3BucketName) || string.IsNullOrEmpty(item.sourceFolderPath)) {
-                    log.Error("one or more key/value of the settings.json file is empty or not defined. ");
-                    throw new InvalidOperationException("one or more key/value of the settings.json file is empty or not defined. ");
+                if (string.IsNullOrEmpty(item.inventoryFileName))
+                {
+                    log.Error("One or more inventoryFileName value is empty in the settings.json file. ");
+                    throw new InvalidOperationException("One or more inventoryFileName value is empty in the settings.json file. ");
                 }
+                if (string.IsNullOrEmpty(item.s3BucketName))
+                {
+                    log.Error("One or more s3BucketName value is empty in the settings.json file. ");
+                    throw new InvalidOperationException("One or more s3BucketName value is empty in the settings.json file. ");
+                }
+                if (string.IsNullOrEmpty(item.sourceFolderPath))
+                {
+                    log.Error("One or more sourceFolderPath value is empty in the settings.json file. ");
+                    throw new InvalidOperationException("One or more sourceFolderPath value is empty in the settings.json file. ");
+                }                
             }
         }
     }

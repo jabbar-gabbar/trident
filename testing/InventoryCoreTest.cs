@@ -167,7 +167,7 @@ namespace testing
             string extFilter = "pdf;";
             InventoryCore inventoryCore = new InventoryCore(sourceFiles, inventoryFiles, extFilter, getSetting());
             List<string> actual = inventoryCore.runInventory();
-            Assert.AreEqual(7, actual.Count);
+            Assert.AreEqual(2, actual.Count);
         }
 
         // test same list in both source and inventory
