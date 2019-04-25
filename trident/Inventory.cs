@@ -38,7 +38,9 @@ namespace trident
                     string line;
                     while ((line = inventoryStream.ReadLine()) != null)
                     {
-                        inventoryFiles.Add(line); // TODO: Assumption is that the file is never hand modified manually by user.
+                        line = line.Trim();
+                        if(!string.IsNullOrEmpty(line))
+                            inventoryFiles.Add(line); // TODO: Assumption is that the file is never hand modified manually by user.
                     }
                 }
             }
