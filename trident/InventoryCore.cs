@@ -127,7 +127,9 @@ namespace trident
                 }
             }
 
-            // 2. 
+            // 2. check through hashset
+            //  creat hash of the inventory file names and iterate over each items in filteredSourceFiles to see 
+            //  if the key exits, if it does not, add the file to final list which needs to be uploaded to s3. 
             HashSet<string> inventoryHash = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             foreach (var item in inventoryFiles)
             {
@@ -136,9 +138,9 @@ namespace trident
             
             foreach (var item in filteredSourceFiles)
             {
-                if (!inventoryHash.Contains(item))
+                if (!inventoryHash.Contains(item))  // efficient since it requires O(1) time.
                 {
-                    finalList.Add(item);
+                    finalList.Add(item); // file need to by uploaded to s3.
                 }
             }            
             return finalList;

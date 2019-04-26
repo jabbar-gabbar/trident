@@ -57,7 +57,7 @@ namespace trident
 
         public void commit(List<string> inventoryList)
         {
-            string files = "\r\n";
+            string files = string.Empty;
             inventoryList.ForEach(x => files += x + "\r\n");
             //log.Info(string.Format("Source Folder: {0}, Committing count: {1}. Files: {2}", setting.sourceFolderPath, inventoryList.Count, files));
 
