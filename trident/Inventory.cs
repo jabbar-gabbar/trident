@@ -55,7 +55,7 @@ namespace trident
             return inventoryCore.runInventory();
         }
 
-        public void commit(List<string> inventoryList)
+        public void commit(List<string> inventoryList, out int batchCount)
         {
             string files = string.Empty;
             inventoryList.ForEach(x => files += x + "\r\n");
@@ -67,6 +67,9 @@ namespace trident
             {
                 inventoryStream.Write(files); // TODO: Assumption is that the file is never modified manually by user.
             }
+            // resets inventoryList after update.
+            inventoryList.Clear();
+            batchCount = 0; // reset
         }
 
         private string getInventoryFilePath()

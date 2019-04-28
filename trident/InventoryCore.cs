@@ -41,7 +41,7 @@ namespace trident
             filteredSourceFiles.Sort();
             inventoryFiles.Sort();
 
-            return generateInventory();
+            return generateFinalInventory();
         }
 
         private void filterExcludedExtensionFiles()
@@ -97,7 +97,7 @@ namespace trident
             }
         }
 
-        private List<string> generateInventory()
+        private List<string> generateFinalInventory()
         {
             List<string> finalList = new List<string>();
             // 1. best case scenario.  compare first last elements and count are same. 

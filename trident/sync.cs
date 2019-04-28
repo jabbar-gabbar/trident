@@ -29,9 +29,9 @@ namespace trident
         //      match first element if matches, find last element of the key in sorted source collection. 
         //      retreive all elements that comes after that. sync all that files to s3 using multipart upload. 
 
-        static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
-        static IAmazonS3 s3Client;
-        static ILog log = LogManager.GetLogger(typeof(Sync));
+        private static readonly string inventoryFolderName = ConfigurationManager.AppSettings["InventoryFolderName"];
+        private IAmazonS3 s3Client;
+        private static ILog log = LogManager.GetLogger(typeof(Sync));
 
         private List<Setting> syncSettings;
         public Sync(List<Setting> syncSettings)
@@ -74,12 +74,11 @@ namespace trident
             abortS3MultipartUploadJob(syncSetting.s3BucketName).Wait();
 
             // go to Inventory class and recursively iterate over the source folder and build file path list.
-            // read inventory file and build file path list.
-            // send both list to InventoryCore class to generate sync list. 
+            // read inventory file and build file path list. send both list to InventoryCore class to generate sync list. 
             Inventory inventory = new Inventory(syncSetting);
             List<string> finalList = inventory.build();
             Upload upload = new Upload(finalList, syncSetting);
-            upload.start(); // start the upload process.
+            upload.start(); 
         }
 
         private async Task abortS3MultipartUploadJob(string bucketName)
