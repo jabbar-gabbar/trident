@@ -55,21 +55,16 @@ namespace trident
             return inventoryCore.runInventory();
         }
 
-        public void commit(List<string> inventoryList, out int batchCount)
+        public void commit(string filePath)
         {
-            string files = string.Empty;
-            inventoryList.ForEach(x => files += x + "\r\n");
             //log.Info(string.Format("Source Folder: {0}, Committing count: {1}. Files: {2}", setting.sourceFolderPath, inventoryList.Count, files));
 
             string inventoryFilePath = this.getInventoryFilePath();
 
             using (StreamWriter inventoryStream = File.AppendText(inventoryFilePath))
             {
-                inventoryStream.Write(files); // TODO: Assumption is that the file is never modified manually by user.
-            }
-            // resets inventoryList after update.
-            inventoryList.Clear();
-            batchCount = 0; // reset
+                inventoryStream.Write(string.Concat(filePath, "\r\n")); // TODO: Assumption is that the file is never modified manually by user.
+            }            
         }
 
         private string getInventoryFilePath()

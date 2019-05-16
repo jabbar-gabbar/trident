@@ -35,6 +35,7 @@ namespace trident
                 sync.start();
 
                 log.Info("Backup complete!!!");
+                Console.ReadLine();
             }
             catch (Exception ex)
             {

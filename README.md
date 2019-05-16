@@ -37,3 +37,6 @@ enter credentials in the file in following format.
 ### Deploy the build
 ### Configure settings
 ### Schedule the auto sync
+Useful command:
+
+dir \\myserver\iphone /o:-s/b/s

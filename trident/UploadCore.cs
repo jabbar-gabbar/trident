@@ -64,13 +64,19 @@ namespace trident
         private async Task<bool> uploadObjectToS3(string keyName, string sourceFilePath) {
             bool uploaded = false;
             try
-            {
+            { 
+                var fileTransferUtility = new TransferUtility(s3Client);
+
                 TransferUtilityUploadRequest req = new TransferUtilityUploadRequest();
                 req.BucketName = setting.s3BucketName;
                 req.Key = keyName;
                 req.FilePath = sourceFilePath;
+                req.UploadProgressEvent += new EventHandler<UploadProgressArgs>(uploadRequest_UploadPartProgressEvent);
 
-                var fileTransferUtility = new TransferUtility(s3Client);
+                Console.Write(new string(' ', Console.WindowWidth));
+                Console.SetCursorPosition(0, 0);
+                Console.Write("Bucket: " + setting.s3BucketName + ", Uploading :" + keyName);
+                Console.SetCursorPosition(38, 3);
 
                 await fileTransferUtility.UploadAsync(req);// uploads an object to s3.  it will overwrite same key name. 
                 uploaded = true;
@@ -86,6 +92,15 @@ namespace trident
                     keyName, setting.s3BucketName), ex);
             }
             return uploaded;
+        }
+
+        private void uploadRequest_UploadPartProgressEvent(object sender, UploadProgressArgs e)
+        {
+            
+            Console.Write(new string(' ', Console.WindowWidth));
+            Console.SetCursorPosition(0, 1);
+            Console.Write("Total bytes:{0:N}. transferred bytes: {1:N}. % done: {2}", e.TotalBytes, e.TransferredBytes, e.PercentDone);
+            Console.SetCursorPosition(38, 3);
         }
     }   
 }
