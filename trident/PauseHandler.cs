@@ -28,8 +28,9 @@ namespace trident
            
             while (!input.Equals("y", StringComparison.OrdinalIgnoreCase))
             {
-                Console.Write(new string(' ', Console.WindowWidth));
-                Console.SetCursorPosition(0, 3);
+                Console.SetCursorPosition(0, 7);
+                Console.Write(new string(' ', Console.WindowWidth - 1));
+                Console.CursorLeft = 0;
                 //Console.Write(new string(' ', Console.WindowWidth));
                 Console.Write("Type \"y\" and \"Enter\" to pause upload: ");
                 input = Console.ReadLine();

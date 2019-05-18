@@ -72,11 +72,12 @@ namespace trident
                 req.Key = keyName;
                 req.FilePath = sourceFilePath;
                 req.UploadProgressEvent += new EventHandler<UploadProgressArgs>(uploadRequest_UploadPartProgressEvent);
-
-                Console.Write(new string(' ', Console.WindowWidth));
                 Console.SetCursorPosition(0, 0);
+                Console.Write(new string(' ', Console.WindowWidth-1));
+                Console.CursorLeft = 0;
                 Console.Write("Bucket: " + setting.s3BucketName + ", Uploading :" + keyName);
-                Console.SetCursorPosition(38, 3);
+                Console.SetCursorPosition(38, 7
+                    );
 
                 await fileTransferUtility.UploadAsync(req);// uploads an object to s3.  it will overwrite same key name. 
                 uploaded = true;
@@ -96,11 +97,15 @@ namespace trident
 
         private void uploadRequest_UploadPartProgressEvent(object sender, UploadProgressArgs e)
         {
-            
-            Console.Write(new string(' ', Console.WindowWidth));
-            Console.SetCursorPosition(0, 1);
-            Console.Write("Total bytes:{0:N}. transferred bytes: {1:N}. % done: {2}", e.TotalBytes, e.TransferredBytes, e.PercentDone);
-            Console.SetCursorPosition(38, 3);
+            Console.SetCursorPosition(0, 2);
+            Console.Write(new string(' ', Console.WindowWidth - 1));
+            Console.SetCursorPosition(0, 3);
+            Console.Write(new string(' ', Console.WindowWidth - 1));
+            Console.SetCursorPosition(0, 4);
+            Console.Write(new string(' ', Console.WindowWidth - 1));
+            Console.SetCursorPosition(0, 2);
+            Console.Write("Total bytes: {0:N} \r\nSent bytes : {1:N} \r\n% Done: {2}", e.TotalBytes, e.TransferredBytes, e.PercentDone);
+            Console.SetCursorPosition(38, 7);
         }
     }   
 }
