@@ -21,10 +21,9 @@ namespace trident
         {
             try
             {
-                if (log.IsInfoEnabled)
-                {
-                    log.Info("Starting trident backup...");
-                }
+
+                logInfo("Starting trident backup...");
+
                 // Check all configurations are in proper state. 
                 readAllConfig();
                 // load settings.json file and retrieve sync settings
@@ -34,7 +33,7 @@ namespace trident
                 Sync sync = new Sync(syncSettings);
                 sync.start();
 
-                log.Info("Backup complete!!!");
+                logInfo("Backup complete!!!");
                 Console.ReadLine();
             }
             catch (Exception ex)
@@ -101,7 +100,7 @@ namespace trident
             }
         }
 
-        static void loadSyncSettings()
+        private static void loadSyncSettings()
         {
             string strSettings = string.Empty;
             using (StreamReader r = new StreamReader(AppContext.BaseDirectory + "\\" + settingsFileName))
@@ -133,6 +132,14 @@ namespace trident
                     log.Error("One or more sourceFolderPath value is empty in the settings.json file. ");
                     throw new InvalidOperationException("One or more sourceFolderPath value is empty in the settings.json file. ");
                 }                
+            }
+        }
+
+        private static void logInfo(string msg)
+        {
+            if (log.IsInfoEnabled)
+            {
+                log.Info(msg);
             }
         }
     }
