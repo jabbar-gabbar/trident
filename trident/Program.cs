@@ -23,7 +23,7 @@ namespace trident
             {
 
                 logInfo("Starting trident backup...");
-
+                Console.Write("Starting trident...");
                 // Check all configurations are in proper state. 
                 readAllConfig();
                 // load settings.json file and retrieve sync settings
@@ -34,6 +34,7 @@ namespace trident
                 sync.start();
 
                 logInfo("Backup complete!!!");
+                Console.Write("Backup complete!!!");
                 Console.ReadLine();
             }
             catch (Exception ex)
